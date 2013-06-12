@@ -24,6 +24,8 @@ int main()
     root_node = insert(root_node,7);
     root_node = insert(root_node,3);
     root_node = insert(root_node,9);
+    root_node = insert(root_node,12);
+    root_node = insert(root_node,1);
     //printf("%d\n",root->right->data);
     print_preorder(root_node);
     destroy_tree(root_node);
@@ -47,7 +49,6 @@ struct node* insert(struct node* node, int data)
 
     if( node == NULL )
     {
-        printf("inserting into %d\n",&node);
         node = new_node(data);
         return(node);
     }
@@ -56,12 +57,12 @@ struct node* insert(struct node* node, int data)
         if (data < node->data)
         {
             printf("go left\n");
-            insert(node->left, data);
+            node->left = insert(node->left, data);
         }
         else
         {
             printf("go right\n");
-            insert(node->right, data);
+            node->right = insert(node->right, data);
         }
     }
     return(node);
