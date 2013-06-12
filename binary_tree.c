@@ -9,74 +9,78 @@ struct node
   struct node *right;
 };
 
-int is_empty_tree(struct node *node);
 struct node* tree_init();
-void insert(int data, struct node *node);
-void destroy_tree(struct node *node);
+struct node* new_node(int data);
+struct node* insert(struct node* node, int data);
+void print_preorder(struct node* tree);
+void destroy_tree(struct node* node);
 
 int main()
 {
-  struct node *root;
+    struct node *root_node = NULL, *elem;
 
-  root = tree_init();
-  printf("%d\n",root->data);
-  insert(5,root);
-  printf("and here\n");
-  //printf("%d\n",root->data);
-  insert(7,root);
-  printf("and here\n");
-  printf("%d\n",root->data);
-  destroy_tree(root);
+    //printf("%d\n",root->data);
+    root_node = insert(root_node,5);
+    root_node = insert(root_node,7);
+    root_node = insert(root_node,3);
+    root_node = insert(root_node,9);
+    //printf("%d\n",root->right->data);
+    print_preorder(root_node);
+    destroy_tree(root_node);
 
-  return 1;
+    return 1;
 }
 
-/* check if specified list is empty */
-int is_empty_tree(struct node *node)
+struct node* new_node(int data) {
+    printf("creating %d\n",data);
+    struct node* node = malloc( sizeof(struct node) );
+    node->data = data;
+    node->left = NULL;
+    node->right = NULL;
+    printf("node data is: %d\n",node->data);
+
+    return(node);
+} 
+
+struct node* insert(struct node* node, int data)
 {
-    if (node == 0)
+
+    if( node == NULL )
     {
-        return 1;
+        printf("inserting into %d\n",&node);
+        node = new_node(data);
+        return(node);
     }
     else
     {
-        return 0;
+        if (data < node->data)
+        {
+            printf("go left\n");
+            insert(node->left, data);
+        }
+        else
+        {
+            printf("go right\n");
+            insert(node->right, data);
+        }
     }
+    return(node);
 }
 
-/* initialize node */
-struct node* tree_init()
+void print_preorder(struct node* tree)
 {
-    struct node *root = 0;
+    if (tree)
+    {
+        printf("%d\n",tree->data);
+        print_preorder(tree->left);
+        print_preorder(tree->right);
+    }
 
-    return root;
-}
-
-void insert(int data, struct node* node)
-{
-    if( is_empty_tree(node) )
-    {
-        node = malloc( sizeof( node ) );
-        node->data = data;
-        node->left = 0;
-        node->right = 0;
-        printf("we here\n");
-    }
-    else if(data < node->data)
-    {
-        printf("test1\n");
-        insert( data, node->left );
-    }
-    else if(data > node->data)
-    {
-        printf("test2\n");
-        insert( data, node->right );
-    }
 }
 
 void destroy_tree(struct node* node)
 {
-  if ( !is_empty_tree(node) )
+  if ( node != NULL )
   {
       destroy_tree(node->left);
       destroy_tree(node->right);
