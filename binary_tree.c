@@ -13,6 +13,8 @@ struct node* tree_init();
 struct node* new_node(int data);
 struct node* insert(struct node* node, int data);
 void print_preorder(struct node* tree);
+void print_inorder(struct node* tree);
+void print_postorder(struct node* tree);
 void destroy_tree(struct node* node);
 
 int main()
@@ -28,18 +30,18 @@ int main()
     root_node = insert(root_node,1);
     //printf("%d\n",root->right->data);
     print_preorder(root_node);
+    printf("%d\n", lookup(root_node,11));
+    printf("%d\n", lookup(root_node,12));
     destroy_tree(root_node);
 
     return 1;
 }
 
 struct node* new_node(int data) {
-    printf("creating %d\n",data);
     struct node* node = malloc( sizeof(struct node) );
     node->data = data;
     node->left = NULL;
     node->right = NULL;
-    printf("node data is: %d\n",node->data);
 
     return(node);
 } 
@@ -56,17 +58,33 @@ struct node* insert(struct node* node, int data)
     {
         if (data < node->data)
         {
-            printf("go left\n");
             node->left = insert(node->left, data);
         }
         else
         {
-            printf("go right\n");
             node->right = insert(node->right, data);
         }
     }
     return(node);
 }
+
+int lookup(struct node* node, int target) {
+    if (node == NULL) {
+        return 0;
+    }
+    else
+    {
+        if (target == node->data)
+        {
+            return 1;
+        }
+        else
+        {
+            if (target < node->data) return(lookup(node->left, target));
+            else return(lookup(node->right, target));
+        }
+    }
+} 
 
 void print_preorder(struct node* tree)
 {
@@ -77,6 +95,26 @@ void print_preorder(struct node* tree)
         print_preorder(tree->right);
     }
 
+}
+
+void print_inorder(struct node* tree)
+{
+    if (tree)
+    {
+        print_inorder(tree->left);
+        printf("%d\n",tree->data);
+        print_inorder(tree->right);
+    }
+}
+
+void print_postorder(struct node* tree)
+{
+    if (tree)
+    {
+        print_postorder(tree->left);
+        print_postorder(tree->right);
+        printf("%d\n",tree->data);
+    }
 }
 
 void destroy_tree(struct node* node)
