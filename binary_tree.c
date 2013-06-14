@@ -1,87 +1,139 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
+#include "binary_tree.h"
 
-struct node
+void link_child_to_parent(struct node* parent, struct node* child)
 {
-  int data;
-  struct node *left;
-  struct node *right;
-};
-
-struct node* tree_init();
-struct node* new_node(int data);
-struct node* insert(struct node* node, int data);
-void print_preorder(struct node* tree);
-void print_inorder(struct node* tree);
-void print_postorder(struct node* tree);
-void destroy_tree(struct node* node);
-
-int main()
-{
-    struct node *root_node = NULL, *elem;
-
-    //printf("%d\n",root->data);
-    root_node = insert(root_node,5);
-    root_node = insert(root_node,7);
-    root_node = insert(root_node,3);
-    root_node = insert(root_node,9);
-    root_node = insert(root_node,12);
-    root_node = insert(root_node,1);
-    //printf("%d\n",root->right->data);
-    print_preorder(root_node);
-    printf("%d\n", lookup(root_node,11));
-    printf("%d\n", lookup(root_node,12));
-    destroy_tree(root_node);
-
-    return 1;
+    if (parent == NULL)
+        return;
+    child->parent = parent;
+    if (parent->data > child->data)
+        parent->left = child;
+    else
+        parent->right = child;
 }
 
-struct node* new_node(int data) {
+struct node* delete_node(struct node* root_node, int data)
+{
+    struct node *node_for_destroy, *child, *child_left, *child_right, *parent,
+            *deep_right_node, *new_root;
+
+    new_root = root_node;
+
+    node_for_destroy = lookup(root_node, data);
+    if (node_for_destroy == NULL)
+        return root_node;
+
+    /* delete leaf - node doesn't have any child */
+    if (node_for_destroy->left == NULL && node_for_destroy->right == NULL)
+    {
+        if (node_for_destroy == root_node)
+        {
+            free(node_for_destroy);
+            return NULL;
+        }
+        else
+        {
+            if (node_for_destroy->parent->data > node_for_destroy->data)
+                node_for_destroy->parent->left = NULL;
+            else
+                node_for_destroy->parent->right = NULL;
+            free(node_for_destroy);
+        }
+    }
+    /* node has 2 children */
+    else if (node_for_destroy->left != NULL && node_for_destroy->right != NULL)
+    {
+        child_left = node_for_destroy->left;
+        child_right = node_for_destroy->right;
+
+        parent = node_for_destroy->parent;
+
+        if (node_for_destroy->parent == NULL)
+            new_root = child_left;
+
+        free(node_for_destroy);
+
+        /* move left child branch higher, to the place of node_for_destroy */
+        link_child_to_parent(parent, child_left);
+        
+        /* searching the deepest right node of left child,
+        we'll link right child branch to it */
+        deep_right_node = child_left;
+        while (deep_right_node->right != NULL)
+        {
+            deep_right_node = deep_right_node->right;
+        }
+        link_child_to_parent(deep_right_node, child_right);
+    }
+    /* node has only 1 child */
+    else
+    {
+        if (node_for_destroy->left != NULL)
+            child = node_for_destroy->left;
+        else
+            child = node_for_destroy->right;
+        parent = node_for_destroy->parent;
+        if (parent == NULL)
+            new_root = child;
+        link_child_to_parent(parent, child);
+        free(node_for_destroy);
+    }
+
+    return new_root;
+}
+
+struct node* new_node(int data, struct node* parent) {
     struct node* node = malloc( sizeof(struct node) );
     node->data = data;
     node->left = NULL;
     node->right = NULL;
+    node->parent = parent;
 
     return(node);
 } 
 
-struct node* insert(struct node* node, int data)
+struct node* insert(struct node* node, int data, struct node* parent)
 {
 
     if( node == NULL )
     {
-        node = new_node(data);
+        node = new_node(data, parent);
         return(node);
     }
     else
     {
         if (data < node->data)
         {
-            node->left = insert(node->left, data);
+            node->left = insert(node->left, data, node);
         }
         else
         {
-            node->right = insert(node->right, data);
+            node->right = insert(node->right, data, node);
         }
     }
     return(node);
 }
 
-int lookup(struct node* node, int target) {
+struct node* lookup(struct node* node, int target)
+{
     if (node == NULL) {
-        return 0;
+        return NULL;
     }
     else
     {
         if (target == node->data)
         {
-            return 1;
+            return node;
         }
         else
         {
-            if (target < node->data) return(lookup(node->left, target));
-            else return(lookup(node->right, target));
+            if (target < node->data)
+            {
+                return(lookup(node->left, target));
+            }
+            else
+            {
+                return(lookup(node->right, target));
+            }
         }
     }
 } 
